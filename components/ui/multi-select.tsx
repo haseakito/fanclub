@@ -18,8 +18,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 export type OptionType = {
-  label: string;
-  value: string;
+  id: string;
+  name: string;
 };
 
 interface MultiSelectProps {
@@ -96,12 +96,12 @@ function MultiSelect({
           <CommandGroup className="max-h-64 overflow-auto">
             {options.map((option) => (
               <CommandItem
-                key={option.value}
+                key={option.id}
                 onSelect={() => {
                   onChange(
-                    selected.includes(option.value)
-                      ? selected.filter((item) => item !== option.value)
-                      : [...selected, option.value]
+                    selected.includes(option.id)
+                      ? selected.filter((item) => item !== option.id)
+                      : [...selected, option.id]
                   );
                   setOpen(true);
                 }}
@@ -109,12 +109,12 @@ function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option.value)
+                    selected.includes(option.id)
                       ? "opacity-100"
                       : "opacity-0"
                   )}
                 />
-                {option.label}
+                {option.name}
               </CommandItem>
             ))}
           </CommandGroup>
