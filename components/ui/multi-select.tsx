@@ -23,13 +23,15 @@ export type OptionType = {
 };
 
 interface MultiSelectProps {
+  placeholder: string;
   options: OptionType[];
-  selected: string[];
-  onChange: React.Dispatch<React.SetStateAction<string[]>>;
+  selected: OptionType[];
+  onChange: React.Dispatch<React.SetStateAction<OptionType[]>>;
   className?: string;
 }
 
 function MultiSelect({
+  placeholder,
   options,
   selected,
   onChange,
@@ -39,7 +41,7 @@ function MultiSelect({
   const [open, setOpen] = React.useState(false);
 
   const handleUnselect = (item: string) => {
-    onChange(selected.filter((i) => i !== item));
+    onChange(selected.filter((i) => i.id !== item));
   };
 
   return (
@@ -57,29 +59,29 @@ function MultiSelect({
           <div className="flex gap-1 flex-wrap">
             {selected.length === 0 && (
               <p className="text-sm font-normal text-muted-foreground">
-                Select categories...
+                {placeholder}
               </p>
             )}
             {selected.map((item) => (
               <Badge
                 variant="secondary"
-                key={item}
+                key={item.id}
                 className="mr-1 mb-1"
-                onClick={() => handleUnselect(item)}
+                onClick={() => handleUnselect(item.id)}
               >
-                {item}
+                {item.name}
                 <button
                   className="ml-1 ring-offset-background rounded-full outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
-                      handleUnselect(item);
+                      handleUnselect(item.id);
                     }
                   }}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                   }}
-                  onClick={() => handleUnselect(item)}
+                  onClick={() => handleUnselect(item.id)}
                 >
                   <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
                 </button>
@@ -89,7 +91,7 @@ function MultiSelect({
           <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="max-w-sm p-1">
         <Command className={className}>
           <CommandInput placeholder="Search ..." />
           <CommandEmpty>No item found.</CommandEmpty>
@@ -98,10 +100,13 @@ function MultiSelect({
               <CommandItem
                 key={option.id}
                 onSelect={() => {
+                  const isSelected = selected.some(
+                    (item) => item.id === option.id
+                  );
                   onChange(
-                    selected.includes(option.id)
-                      ? selected.filter((item) => item !== option.id)
-                      : [...selected, option.id]
+                    isSelected
+                      ? selected.filter((item) => item.id !== option.id)
+                      : [...selected, option]
                   );
                   setOpen(true);
                 }}
@@ -109,7 +114,7 @@ function MultiSelect({
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    selected.includes(option.id)
+                    selected.some((item) => item.id === option.id)
                       ? "opacity-100"
                       : "opacity-0"
                   )}
