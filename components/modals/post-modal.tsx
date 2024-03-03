@@ -67,7 +67,7 @@ export function PostModal() {
       );
 
       // Show successful toast
-      toast.success("Successfully created the store");
+      toast.success("Successfully created the post");
 
       // Refresh page and redirect to the post edit page
       window.location.assign(`/studio/posts/${res.data.id}`);
@@ -84,7 +84,7 @@ export function PostModal() {
 
   return (
     <Modal
-      title="Create store"
+      title="Create post"
       description="Add a new post to surprise your fans"
       isOpen={postModal.isOpen}
       onClose={postModal.onClose}
