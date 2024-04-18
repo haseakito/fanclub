@@ -3,18 +3,19 @@ import { UserTable } from "./components/user-table";
 import { UserColumn } from "./components/columns";
 
 interface AdminDashboardPageProps {
-  limit?: number;
-  offset?: number;
-  query?: string;
+  searchParams: {
+    limit?: number;
+    offset?: number;
+    query?: string;
+  }
 }
 
 export default async function AdminDashboardPage({
-  limit = 10,
-  offset = 0,
+  searchParams
 }: AdminDashboardPageProps) {
   const users = await clerkClient.users.getUserList({
-    limit: limit,
-    offset: offset,
+    limit: searchParams.limit,
+    offset: searchParams.offset,
   });
 
   const formattedUsers: UserColumn[] = users.map((user) => ({
@@ -23,7 +24,9 @@ export default async function AdminDashboardPage({
     profile_image_url: user.imageUrl,
     email_address: user.emailAddresses[0].emailAddress,
     phone_number:
-      user.phoneNumbers.length !== 0 ? user.phoneNumbers[0].phoneNumber : "No number",
+      user.phoneNumbers.length !== 0
+        ? user.phoneNumbers[0].phoneNumber
+        : "No number",
   }));
 
   return (
