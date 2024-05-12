@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs";
 import qs from "query-string";
 
 interface FetchPostsProps {
@@ -10,9 +9,6 @@ export async function FetchUsers({
   limit = 10,
   offset = 0,
 }: FetchPostsProps): Promise<User[]> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
-
   // Stringfy the url with the provided parameters
   const url = qs.stringifyUrl({
     url: process.env.NEXT_PUBLIC_API_URL + "/users",
@@ -26,7 +22,7 @@ export async function FetchUsers({
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${await getToken()}`,
+      Authorization: `Bearer `,
     },
   });
 
@@ -37,18 +33,12 @@ export async function FetchUsers({
 }
 
 export async function FetchUser(userId: string): Promise<FetchUserResponse> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
-
   // Stringfy the url with the provided parameters
   const url = process.env.NEXT_PUBLIC_API_URL + `/users/${userId}`;
 
   // GET request to fetch posts
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${await getToken()}`,
-    },
   });
 
   // Parse json body

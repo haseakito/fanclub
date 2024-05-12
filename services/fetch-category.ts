@@ -1,9 +1,4 @@
-import { auth } from "@clerk/nextjs";
-
 export async function FetchCategories(): Promise<Category[]> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
-
   // Stringfy the url with the provided parameters
   const url = process.env.NEXT_PUBLIC_API_URL + "/categories";
 
@@ -11,7 +6,7 @@ export async function FetchCategories(): Promise<Category[]> {
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${await getToken()}`,
+      Authorization: `Bearer `,
     },
   });
 
@@ -22,9 +17,6 @@ export async function FetchCategories(): Promise<Category[]> {
 }
 
 export async function FetchCategory(categoryId: string): Promise<Category> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
-
   // Stringfy the url with the provided parameters
   const url = process.env.NEXT_PUBLIC_API_URL + `/categories/${categoryId}`;
 
@@ -32,7 +24,7 @@ export async function FetchCategory(categoryId: string): Promise<Category> {
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${await getToken()}`,
+      Authorization: `Bearer `,
     },
   });
 
