@@ -3,12 +3,12 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { StudioNavigationMenu } from "./nav-items";
 import { StudioMobileMenu } from "./mobile-menu";
 
-export function Navbar() {
+export function Navbar({ signedIn }: { signedIn: boolean }) {
   return (
     <>
       <div className="sm:ml-16 md:ml-52 border-b-[1px] shadow-sm h-16 flex items-center justify-between gap-x-2.5 px-4">
         <div className="block sm:hidden">
-          <StudioMobileMenu />
+          <StudioMobileMenu signedIn={signedIn} />
         </div>
         <Link
           href="/studio"
@@ -20,7 +20,7 @@ export function Navbar() {
           <ThemeToggle />
         </div>
       </div>
-      <StudioNavigationMenu />
+      <StudioNavigationMenu signedIn={signedIn} />
     </>
   );
 }
