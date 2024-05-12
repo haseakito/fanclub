@@ -3,62 +3,40 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Button } from "@/components/ui/button";
-import { Currency } from "@/components/currency";
-
-import { Expand } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface PostCardProps {
   post: Post;
   categories: Category[];
-  asset: Asset;
 }
 
-export const PostCard: React.FC<PostCardProps> = ({
-  post,
-  categories,
-  asset,
-}) => {
+export const PostCard: React.FC<PostCardProps> = ({ post, categories }) => {
   // Hooks handling router
   const router = useRouter();
 
-  // Function handdling redirecting the user to product detail page
-  const handleClick = () => {
-    router.push(`/posts/${post.id}`);
-  };
-
   return (
-    <div className="bg-white group cursor-pointer rounded-xl border p-3 space-y-4">
+    <div
+      className="bg-white hover:bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm cursor-pointer rounded-xl hover:rounded-sm p-1 space-y-1 duration-150"
+      onClick={() => router.push(`posts/${post.id}`)}
+    >
       <div className="aspect-square rounded-xl bg-gray-100 relative">
         <Image
-          width={500}
-          height={500}
-          src={asset.url}
-          alt="product image"
-          className="object-cover rounded-md"
+          src={post.thumbnail_url || ""}
+          alt="post thumbnail"
+          priority
+          fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          className="rounded-md hover:rounded-sm duration-150"
         />
-        <div className="opacity-0 group-hover:opacity-100 transition absolute w-full px-6 bottom-5">
-          <div className="flex gap-x-6 justify-center">
-            <Button size="icon" onClick={handleClick}>
-              <Expand size={20} className="text-gray-300" />
-            </Button>
-          </div>
-        </div>
-      </div>
-      {/* Description & category */}
-      <div>
-        <p className="font-semibold text-lg">{post.title}</p>
-        <div className="">
+
+        <div className="absolute bottom-0 left-0 p-2">
           {categories.map((category) => (
-            <Badge key={category.id} variant="secondary">
+            <Badge key={category.id} variant="secondary" className="m-0.5">
               {category.name}
             </Badge>
           ))}
         </div>
       </div>
-      {/* Price & preview */}
-      {post.price ? <Currency price={post.price || 0} /> : null}
     </div>
   );
 };
