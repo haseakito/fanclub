@@ -2,7 +2,7 @@
 
 import axios from "@/lib/axios";
 import * as z from "zod";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -32,7 +32,11 @@ const formSchema = z.object({
   }),
 });
 
-export function VerifyEmailForm() {
+interface VerifyEmailFormProps {
+  email?: string;
+}
+
+export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ email }) => {
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -56,7 +60,7 @@ export function VerifyEmailForm() {
 
       await axios.post("/auth/verify-email", {
         code: e.code,
-        email: searchParams.get("email"),
+        email: email,
       });
 
       // Show a success toast
@@ -121,4 +125,4 @@ export function VerifyEmailForm() {
       </Form>
     </>
   );
-}
+};

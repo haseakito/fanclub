@@ -3,7 +3,7 @@
 import axios from "axios";
 import * as z from "zod";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -36,7 +36,14 @@ const formSchema = z
     path: ["confirmPassword"],
   });
 
-export const PasswordResetConfirmForm = () => {
+interface PasswordResetConfirmFormProps {
+  email?: string;
+  code?: string;
+}
+
+export const PasswordResetConfirmForm: React.FC<
+  PasswordResetConfirmFormProps
+> = ({ email, code }) => {
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -44,7 +51,6 @@ export const PasswordResetConfirmForm = () => {
   const router = useRouter();
 
   // Hooks handling url query
-  const searchParams = useSearchParams();
 
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -57,9 +63,9 @@ export const PasswordResetConfirmForm = () => {
       setLoading(true);
 
       await axios.post(process.env.NEXT_PUBLIC_API_URL + "/auth/sign-up", {
-        email: searchParams.get("email"),
+        email: email,
         password: e.password,
-        code: searchParams.get("code"),
+        code: code,
       });
 
       // Show a success toast

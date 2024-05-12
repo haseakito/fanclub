@@ -2,7 +2,13 @@ import { redirect } from "next/navigation";
 import { checkSession } from "@/lib/session";
 import { VerifyEmailForm } from "./components/verify-email-form";
 
-export default function VerifyEmailPage() {
+interface VerifyEmailPageProps {
+  params: {
+    email?: string;
+  };
+}
+
+export default function VerifyEmailPage({ params }: VerifyEmailPageProps) {
   // Boolean state checking if the user has signed in
   const signedIn = checkSession();
 
@@ -13,7 +19,7 @@ export default function VerifyEmailPage() {
 
   return (
     <div className="mx-auto w-full justify-center space-y-6 sm:w-[350px]">
-      <VerifyEmailForm />
+      <VerifyEmailForm email={params.email} />
     </div>
   );
 }

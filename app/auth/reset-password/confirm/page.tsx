@@ -1,9 +1,18 @@
 import { PasswordResetConfirmForm } from "./components/password-reset-confirm-form";
 
-export default function PasswordResetConfirmFormPage() {
+interface PasswordResetConfirmFormPage {
+  params: {
+    email?: string;
+    code?: string;
+  };
+}
+
+export default function PasswordResetConfirmFormPage({
+  params,
+}: PasswordResetConfirmFormPage) {
   return (
     <div className="mx-auto w-full justify-center space-y-6 sm:w-[500px]">
-      <PasswordResetConfirmForm />
+      <PasswordResetConfirmForm email={params.email} code={params.code} />
     </div>
   );
 }

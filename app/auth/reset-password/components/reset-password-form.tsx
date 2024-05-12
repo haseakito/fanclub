@@ -3,7 +3,7 @@
 import axios from "axios";
 import * as z from "zod";
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -79,7 +78,6 @@ export function PasswordResetForm() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mt-3 mx-auto">
           {/* User email field */}
-
           <FormField
             control={form.control}
             name="email"
