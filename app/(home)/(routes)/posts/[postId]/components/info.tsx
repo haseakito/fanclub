@@ -1,44 +1,171 @@
 "use client";
 
+import axios from "@/lib/axios";
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
 import { Currency } from "@/components/currency";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ThumbsUp } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+
+import { ThumbsDown, ThumbsUp } from "lucide-react";
 
 interface InfoProps {
-  data: Post;
-  likes: number;
+  post: Post;
   user: User;
+  token: string;
+  likes: number;
+  hasLiked: boolean;
+  isLocked: boolean;
+  isOwned: boolean;
   categories: Category[];
-  subscriptions: Subscription[];
 }
 
 export const Info: React.FC<InfoProps> = ({
-  data,
-  likes,
+  post,
   user,
+  token,
+  likes,
+  hasLiked,
+  isLocked,
+  isOwned,
   categories,
-  subscriptions,
 }) => {
-  const onLike = async () => {};
+  // Boolean state handling loading during API request
+  const [loading, setLoading] = useState(false);
 
-  const onCheckout = async () => {};
+  // Hooks handling router
+  const router = useRouter();
 
-  const onSubscribe = async (subscriptionId: string) => {};
+  // Hooks handling url param
+  const params = useParams();
+
+  // Function handling liking the post
+  const onLike = async () => {
+    try {
+      setLoading(true);
+
+      // POST request to server
+      await axios.post(
+        `/likes/create`,
+        {
+          postId: post.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Show a success toast
+      toast.success("Successfully liked the post.");
+
+      // Refresh the page
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+
+      // Show an error toast
+      toast.error("Ooops! There was a problem with your request!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function handling removing like for the post
+  const onDislike = async () => {
+    try {
+      setLoading(true);
+
+      // POST request to server
+      await axios.post(
+        `/likes/destroy`,
+        {
+          postId: post.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Show a success toast
+      toast.success("Successfully deleted the like.");
+
+      // Refresh the page
+      router.refresh();
+    } catch (error) {
+      console.log(error);
+
+      // Show an error toast
+      toast.error("Ooops! There was a problem with your request!");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //
+  const onCheckout = async () => {
+    try {
+      setLoading(true);
+
+      const res = await axios.post(
+        `/checkout`,
+        {
+          post: post.id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Show a success toast
+      toast.success("Successfully updated the post.");
+
+      // Redirect the user to Stripe hosted checkout page
+      window.location.assign(res.data.url);
+    } catch (error) {
+      console.log(error);
+
+      // Show an error toast
+      toast.error("Ooops! There was a problem with your request!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-gray-900">{data.title}</h1>
+      <h1 className="text-3xl font-bold text-gray-900">{post.title}</h1>
       <div className="mt-3 flex items-end justify-between">
-        <p className="text-2xl text-gray-900">
-          <Currency price={data.price || 0} />
-        </p>
+        <Currency price={post.price || 0} />
+
         <div className="flex items-center gap-x-2">
-          <Button size="icon" variant="outline">
-            <ThumbsUp className="h-5 w-5" />
-          </Button>
+          {hasLiked ? (
+            <Button
+              size="icon"
+              disabled={loading || isOwned}
+              onClick={onDislike}
+            >
+              <ThumbsDown className="h-5 w-5" />
+            </Button>
+          ) : (
+            <Button
+              size="icon"
+              variant="outline"
+              disabled={loading || isOwned}
+              onClick={onLike}
+            >
+              <ThumbsUp className="h-5 w-5" />
+            </Button>
+          )}
           <p className="text-xs text-muted-foreground">{likes}</p>
         </div>
       </div>
@@ -56,71 +183,49 @@ export const Info: React.FC<InfoProps> = ({
               width={30}
               height={30}
               src={user.profile_image_url}
-              alt=""
-              className="rounded-full"
+              alt="profile"
+              className="p-[1px] rounded-full ring-1 ring-gray-300 dark:ring-gray-500"
             />
             <p className="text-sm font-medium">@{user.username}</p>
           </Link>
         </div>
         <div>
-          <h2 className="text-sm font-medium leading-6 text-gray-900">
+          <h2 className="mb-2 text-sm font-medium leading-6 text-gray-900">
             Categories
           </h2>
-          {categories.length !== 0 ? (
-            categories.map((category) => (
-              <Badge key={category.id} variant="secondary">
-                {category.name}
-              </Badge>
-            ))
-          ) : (
+          {categories.length === 0 ? (
             <p className="mt-1 text-sm leading-6 text-gray-700">
               No categories
             </p>
-          )}
-        </div>
-        <div>
-          <h2 className="text-sm font-medium leading-6 text-gray-900">
-            Subscriptions
-          </h2>
-          {subscriptions.length !== 0 ? (
-            subscriptions.map((sub) => (
-              <Badge key={sub.id} variant="secondary">
-                {sub.name}
-              </Badge>
-            ))
           ) : (
-            <p className="mt-1 text-sm leading-6 text-gray-700">
-              No subscriptions
-            </p>
+            <div className="flex gap-x-1">
+              {categories.map((category) => (
+                <Badge key={category.id} variant="secondary">
+                  {category.name}
+                </Badge>
+              ))}
+            </div>
           )}
         </div>
+
         <div>
           <h2 className="text-sm font-medium leading-6 text-gray-900">
             Description
           </h2>
           <p className="mt-1 text-sm leading-6 text-gray-700">
-            {data.description}
+            {post.description}
           </p>
         </div>
       </div>
       <div className="mt-10">
-        <Button className="w-full" onClick={onCheckout}>
-          Checkout
-        </Button>
-        {data.edges.subscriptions && (
-          <div className="space-y-2">
-            <p className="my-5 text-xs text-muted-foreground">or</p>
-            {data.edges.subscriptions.map((sub) => (
-              <Button
-                key={sub.id}
-                variant="default"
-                className="w-full"
-                onClick={() => onSubscribe(sub.id)}
-              >
-                Subscribe to {sub.name}
-              </Button>
-            ))}
-          </div>
+        {!isLocked || isOwned ? null : (
+          <Button
+            className="w-full"
+            onClick={onCheckout}
+            disabled={loading || !isLocked || isOwned}
+          >
+            Checkout
+          </Button>
         )}
       </div>
     </div>
