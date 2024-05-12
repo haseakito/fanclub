@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 
 import { Modal } from "@/components/ui/modal";
 import { Button } from "@/components/ui/button";
+import { Input } from "../ui/input";
 
 interface AlertModalProps {
   isOpen: boolean;
@@ -18,17 +19,29 @@ export const AlertModal: React.FC<AlertModalProps> = ({
   onConfirm,
   loading,
 }) => {
-  // Boolean state handling component mount state
+  // Boolean state to track if the component has mounted to the DOM
   const [isMounted, setIsMounted] = useState(false);
 
-  // Lifecycle handling setting component mount state
+  // String state storing the text input to confirm an action
+  const [confirmText, setConfirmText] = useState("");
+
+  // Boolean state handling if the user can proceed to an action
+  const isConfirmDisabled = confirmText !== "permanently delete" || loading;
+
+  // Hooks to set the isMounted state to true after initial render to avoid hydration error
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // If the component is not yet mounted, don't render anything
   if (!isMounted) {
     return null;
   }
+
+  // Handler to check if the input matches the required phrase
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setConfirmText(event.target.value);
+  };
 
   return (
     <Modal
@@ -37,11 +50,26 @@ export const AlertModal: React.FC<AlertModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
     >
+      <p className="text-xs text-muted-foreground">
+        To confirm, type permanently delete in the box below
+      </p>
+      <Input
+        type="text"
+        placeholder="permanently delete"
+        value={confirmText}
+        onChange={handleInputChange}
+        disabled={loading}
+        className="mb-3 italic text-muted-foreground"
+      />
       <div className="pt-3 space-x-2 flex items-center justify-end w-full">
         <Button disabled={loading} variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button disabled={loading} variant="destructive" onClick={onConfirm}>
+        <Button
+          disabled={isConfirmDisabled}
+          variant="destructive"
+          onClick={onConfirm}
+        >
           Continue
         </Button>
       </div>
