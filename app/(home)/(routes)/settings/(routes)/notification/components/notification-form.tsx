@@ -1,15 +1,13 @@
 "use client";
 
-import axios from "axios";
+import axios from "@/lib/axios";
 import * as z from "zod";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 
-import { Divider } from "@/components/ui/divider";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -29,15 +27,13 @@ const formSchema = z.object({
 
 interface NotificationFormProps {
   initialData: User | null;
+  token: string | null;
 }
 
 export const NotificationForm: React.FC<NotificationFormProps> = ({
   initialData,
+  token,
 }) => {
-  const { userId, getToken } = useAuth();
-
-  const [enabled, setEnabled] = useState(false);
-
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -54,71 +50,47 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
   // Hooks handling router
   const router = useRouter();
 
-  // Hooks handling url param
-  const params = useParams();
-
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (form.formState.isDirty) {
-        event.preventDefault();
-
-        return "You have unsaved changes. Are you sure you want to leave?";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [form.formState.isDirty]);
-
-  //
+  // Function handling updating the notification settings
   const onSubmit = async (e: z.infer<typeof formSchema>) => {
-    console.log(e);
-    // try {
-    //   setLoading(true);
+    try {
+      setLoading(true);
 
-    //   await axios.patch(
-    //     process.env.NEXT_PUBLIC_API_URL + `/users/${userId}`,
-    //     {
-    //       e,
-    //     },
-    //     {
-    //       headers: {
-    //         Authorization: `${await getToken()}`,
-    //         "Content-Type": "application/json",
-    //       },
-    //     }
-    //   );
+      await axios.patch(
+        `/users/update/notifications`,
+        {
+          e,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    //   // Show a success toast
-    //   toast.success("Successfully updated the post.");
+      // Show a success toast
+      toast.success("Successfully updated the post.");
 
-    //   // Refresh the page
-    //   router.refresh();
-    // } catch (error) {
-    //   console.log(error);
+      // Refresh the page
+      router.refresh();
+    } catch (error) {
+      console.log(error);
 
-    //   // Show an error toast
-    //   toast.error("Ooops! There was a problem with your request!");
-    // } finally {
-    //   setLoading(false);
-    // }
+      // Show an error toast
+      toast.error("Ooops! There was a problem with your request!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <>
-      <h3 className="text-lg font-medium">Update your account.</h3>
-      <p className="text-sm text-muted-foreground">Configure how you receive notifications.</p>
-
-      <Divider />
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -134,8 +106,8 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                   <div>
                     <FormLabel>Marketing</FormLabel>
                     <FormDescription>
-                      Receive emails and push notifications about new products,
-                      features, and more.
+                      Receive notifications about new products, features, and
+                      more.
                     </FormDescription>
                   </div>
                   <FormControl>
@@ -175,7 +147,7 @@ export const NotificationForm: React.FC<NotificationFormProps> = ({
                   <div>
                     <FormLabel>Social</FormLabel>
                     <FormDescription>
-                      Receive emails for likes, follows, orders and more.
+                      Receive notifications for likes, follows, orders and more.
                     </FormDescription>
                   </div>
                   <FormControl>
