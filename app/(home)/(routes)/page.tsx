@@ -1,16 +1,19 @@
-import { FetchBillboards } from "@/services/fetch-billboard";
+import { client } from "@/lib/microcms";
+import { FetchPosts } from "@/services/fetch-post";
+
 import { Container } from "@/components/ui/container";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Heading } from "@/components/ui/heading";
 import { Billboard } from "@/components/ui/billboard";
-import { FetchPosts } from "@/services/fetch-post";
 import { PostList } from "@/components/post-list";
 
 export default async function HomePage() {
-  // Fetch billboards
-  const billboards = await FetchBillboards();
+  // Fetch billboards from microCMS
+  const billboards = await client.get({
+    endpoint: "billboards",
+  });
 
-  // Fetch posts
+  // Fetch posts with pagination
+  // TODO: Add infinate scroll
   const posts = await FetchPosts({
     limit: 6,
     offset: 0,
@@ -19,7 +22,7 @@ export default async function HomePage() {
   return (
     <Container>
       <div className="w-full h-full p-8">
-        <Billboard data={billboards} />
+        <Billboard data={billboards.contents} />
         <div className="mt-8">
           <Heading
             title="New Posts"
