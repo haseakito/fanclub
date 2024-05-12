@@ -5,7 +5,6 @@ import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
@@ -30,8 +29,6 @@ const formSchema = z.object({
 });
 
 export function CategoryModal() {
-  const { getToken } = useAuth();
-
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -39,7 +36,7 @@ export function CategoryModal() {
   const categoryModal = useCategoryModal();
 
   // Hooks handling router
-  const router = useRouter()
+  const router = useRouter();
 
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,11 +56,11 @@ export function CategoryModal() {
       await axios.post(
         process.env.NEXT_PUBLIC_API_URL + "/categories",
         {
-          name: e.name
+          name: e.name,
         },
         {
           headers: {
-            Authorization: `Bearer ${await getToken()}`,
+            Authorization: `Bearer `,
             "Content-Type": "application/json",
           },
         }
@@ -74,9 +71,8 @@ export function CategoryModal() {
 
       // Show confetti
 
-      // 
-      router.refresh()
-      
+      //
+      router.refresh();
     } catch (error) {
       // Output the error to log
       console.log(error);
@@ -85,7 +81,7 @@ export function CategoryModal() {
       toast.error("Ooops! Something went wrong with your request.");
     } finally {
       setLoading(false);
-      categoryModal.onClose()
+      categoryModal.onClose();
     }
   };
 
