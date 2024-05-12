@@ -1,43 +1,53 @@
 import Image from "next/image";
 import NextLink from "next/link";
-import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { FetchUser } from "@/services/fetch-user";
-import { FetchPostsByUser } from "@/services/fetch-post";
+import { FetchPosts } from "@/services/fetch-post";
+import { getSession } from "@/lib/session";
 import { formatDate } from "@/lib/format";
 
 import { Container } from "@/components/ui/container";
 import { Heading } from "@/components/ui/heading";
 import { PostList } from "@/components/post-list";
+import { Divider } from "@/components/ui/divider";
 
 import { Calendar, Link } from "lucide-react";
 
 export default async function ProfilePage() {
-  const { userId } = auth();
+  // Retrieve session from cookie
+  const session = getSession();
 
+  // Retrieve user id from decoded token
+  const userId = session?.user.userId;
+
+  // If no session found, redirect the user
   if (!userId) {
     redirect("/");
   }
 
+  // Fetch current user with user id
   const res = await FetchUser(userId);
 
-  // Fetch posts
-  const posts = await FetchPostsByUser({
-    limit: 6,
+  // Fetch posts associated with the user
+  const posts = await FetchPosts({
+    limit: 10,
     offset: 0,
+    userId: userId,
   });
 
   return (
     <Container>
       <div className="px-6 lg:px-8">
         <div className="sm:flex items-center sm:justify-between">
-          <Image
-            width={120}
-            height={120}
-            src={res.user.profile_image_url}
-            alt=""
-            className="rounded-full"
-          />
+          {res.user.profile_image_url ? (
+            <Image
+              width={130}
+              height={130}
+              src={res.user.profile_image_url}
+              alt="profile"
+              className="p-1 rounded-full ring-2 ring-gray-300 dark:ring-gray-500"
+            />
+          ) : null}
           <div>
             <p className="mt-5 text-xl font-bold">{res.user.name}</p>
             <p className="ml-1 text-sm text-muted-foreground">
@@ -48,7 +58,9 @@ export default async function ProfilePage() {
                 <div>
                   <Link className="h-4 w-4 text-muted-foreground" />
                   <a
-                    href="https://example.com/"
+                    href={res.user.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="text-sm font-medium text-blue-600 dark:text-blue-500 hover:underline"
                   >
                     <p className="w-64 overflow-hidden overflow-ellipsis whitespace-nowrap">
@@ -86,10 +98,8 @@ export default async function ProfilePage() {
       </div>
 
       <div className="mt-10">
-        <Heading
-          title="Your Posts"
-          description="Explore the newly released posts from this creator"
-        />
+        <Heading title="Your Posts" description="Explore your library." />
+        <Divider />
         <PostList posts={posts} />
       </div>
     </Container>
