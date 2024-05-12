@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/form";
 import { AlertModal } from "@/components/modals/alert-modal";
 import { Trash } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
 
 const formSchema = z.object({
   name: z.string().min(1, "Title is required"),
@@ -41,8 +40,6 @@ interface PostFormProps {
 }
 
 export const SubscriptionForm: React.FC<PostFormProps> = ({ initialData }) => {
-  const { userId, getToken } = useAuth();
-
   // Boolean state handling modal state
   const [open, setOpen] = useState(false);
 
@@ -107,7 +104,6 @@ export const SubscriptionForm: React.FC<PostFormProps> = ({ initialData }) => {
 
       const data = {
         ...e,
-        user_id: userId,
       };
 
       await axios.post(
@@ -115,7 +111,7 @@ export const SubscriptionForm: React.FC<PostFormProps> = ({ initialData }) => {
         data,
         {
           headers: {
-            Authorization: `${await getToken()}`,
+            Authorization: ``,
             "Content-Type": "application/json",
           },
         }
