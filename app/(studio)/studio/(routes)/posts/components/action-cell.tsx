@@ -3,7 +3,6 @@
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -24,8 +23,6 @@ interface ActionCellProps {
 }
 
 export const ActionCell: React.FC<ActionCellProps> = ({ data }) => {
-  const { getToken } = useAuth();
-
   // Boolean state handling modal state
   const [open, setOpen] = useState(false);
 
@@ -35,21 +32,14 @@ export const ActionCell: React.FC<ActionCellProps> = ({ data }) => {
   // Hooks handling router
   const router = useRouter();
 
-  // Asynchronous function handling deleting the product
+  // Asynchronous function handling deleting the post
   const onConfirm = async () => {
     try {
       // set loading state to be true during API call
       setLoading(true);
 
       // DELETE request to backend API
-      await axios.delete(
-        process.env.NEXT_PUBLIC_API_URL + `/posts/${data.id}`,
-        {
-          headers: {
-            Authorization: `${await getToken()}`,            
-          },
-        }
-      );
+      await axios.delete(process.env.NEXT_PUBLIC_API_URL + `/posts/${data.id}`);
 
       // Show successful toast
       toast.success("Successfully deleted the product.");

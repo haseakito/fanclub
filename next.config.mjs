@@ -4,12 +4,22 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "res.cloudinary.com",
+        hostname: "images.microcms-assets.io",
         port: "",
       },
       {
         protocol: "https",
-        hostname: "images.clerk.dev",
+        hostname: "picsum.photos",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "dbdehqz6rw0l.cloudfront.net",
+        port: "",
+      },
+      {
+        protocol: "https",
+        hostname: "image.mux.com",
         port: "",
       },
     ],

@@ -1,33 +1,30 @@
-import { auth } from "@clerk/nextjs";
 import qs from "query-string";
+import { getToken } from "@/lib/session";
 
 interface FetchPostsProps {
   limit?: number;
   offset?: number;
+  userId?: string;
 }
 
 export async function FetchPosts({
   limit = 10,
   offset = 0,
+  userId,
 }: FetchPostsProps): Promise<Post[]> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
-
   // Stringfy the url with the provided parameters
   const url = qs.stringifyUrl({
     url: process.env.NEXT_PUBLIC_API_URL + "/posts",
     query: {
       limit: limit,
       offset: offset,
+      userId: userId,
     },
   });
 
   // GET request to fetch posts
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      Authorization: `Bearer ${await getToken()}`,
-    },
   });
 
   // Parse json body
@@ -37,8 +34,8 @@ export async function FetchPosts({
 }
 
 export async function FetchPost(postId: string): Promise<FetchPostResponse> {
-  // Hooks handling fetching session token
-  const { getToken } = auth();
+  // Retrieve token from cookie
+  const token = getToken();
 
   // Stringfy the url with the provided parameters
   const url = process.env.NEXT_PUBLIC_API_URL + `/posts/${postId}`;
@@ -47,7 +44,7 @@ export async function FetchPost(postId: string): Promise<FetchPostResponse> {
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${await getToken()}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 
@@ -57,21 +54,16 @@ export async function FetchPost(postId: string): Promise<FetchPostResponse> {
   return body;
 }
 
-interface FetchPostsByUserProps {
-  limit?: number;
-  offset?: number;
-}
-
-export async function FetchPostsByUser({
+export async function FetchPostByLike({
   limit = 10,
   offset = 0,
-}: FetchPostsByUserProps): Promise<Post[]> {
-  // Hooks handling fetching session token
-  const { userId, getToken } = auth();
+}: FetchPostsProps): Promise<Post[]> {
+  // Retrieve token from cookie
+  const token = getToken();
 
   // Stringfy the url with the provided parameters
   const url = qs.stringifyUrl({
-    url: process.env.NEXT_PUBLIC_API_URL + `/users/${userId}/posts`,
+    url: process.env.NEXT_PUBLIC_API_URL + "/likes/posts",
     query: {
       limit: limit,
       offset: offset,
@@ -82,7 +74,7 @@ export async function FetchPostsByUser({
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      Authorization: `Bearer ${await getToken()}`,
+      Authorization: `Bearer ${token}`,
     },
   });
 

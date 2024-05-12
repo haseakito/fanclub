@@ -1,10 +1,9 @@
 "use client";
 
 import * as z from "zod";
-import axios from "axios";
+import axios from "@/lib/axios";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "@clerk/nextjs";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
 
@@ -23,14 +22,21 @@ import { Modal } from "@/components/ui/modal";
 import { usePostModal } from "@/hooks/use-post-modal";
 
 const formSchema = z.object({
-  title: z.string().min(1, {
-    message: "Post title is required",
-  }),
+  title: z
+    .string()
+    .min(1, {
+      message: "Post title is required",
+    })
+    .max(100, {
+      message: "Post title must be no more than 100 characters long",
+    }),
 });
 
-export function PostModal() {
-  const { userId, getToken } = useAuth();
+interface PostModalProps {
+  token: string | null;
+}
 
+export const PostModal: React.FC<PostModalProps> = ({ token }) => {
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -51,17 +57,15 @@ export function PostModal() {
       // set loading state to be true during API call
       setLoading(true);
 
-      // POST request to the backend API
+      // POST request to server
       const res = await axios.post(
-        process.env.NEXT_PUBLIC_API_URL + "/posts",
+        "/posts",
         {
           title: e.title,
-          user_id: userId,
         },
         {
           headers: {
-            Authorization: `Bearer ${await getToken()}`,
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -128,4 +132,4 @@ export function PostModal() {
       </Form>
     </Modal>
   );
-}
+};

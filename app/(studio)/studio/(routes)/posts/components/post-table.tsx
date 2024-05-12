@@ -13,23 +13,19 @@ import { PostColumn, columns } from "./columns";
 
 interface PostTableProps {
   data: PostColumn[];
+  token: string | null;
 }
 
-export const PostTable: React.FC<PostTableProps> = ({ data }) => {
-  // 
-  const postModal = usePostModal()
+export const PostTable: React.FC<PostTableProps> = ({ data, token }) => {
+  // Hooks handling creating a new post
+  const postModal = usePostModal();
 
   return (
     <>
-      <PostModal />
+      <PostModal token={token} />
       <div className="flex items-center justify-between">
-        <Heading
-          title="Posts"
-          description="Manage posts for your fans."
-        />
-        <Button
-          onClick={() => postModal.onOpen()}
-        >
+        <Heading title="Posts" description="Manage posts for your fans." />
+        <Button onClick={() => postModal.onOpen()}>
           <Plus className="mr-2 h-4 w-4" /> Add New
         </Button>
       </div>

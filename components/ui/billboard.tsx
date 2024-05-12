@@ -18,10 +18,15 @@ export const Billboard: React.FC<BillboardProps> = ({ data }) => {
             key={billboard.id}
             className="rounded-xl relative aspect-square md:aspect-[2.4/1] overflow-hidden bg-cover"
           >
-            <Image src={billboard.edges.asset.url} alt="billboard" fill />
+            <Image
+              src={billboard.billboard_image.url}
+              alt="billboard"
+              fill
+              priority
+            />
           </CarouselItem>
         ))}
-      </CarouselContent>      
+      </CarouselContent>
     </Carousel>
   );
 };

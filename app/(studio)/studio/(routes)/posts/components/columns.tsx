@@ -13,7 +13,7 @@ export type PostColumn = {
   status: boolean;
 };
 
-// TODO: add post id and use row in checkbox to delete
+// TODO: Add bulk delete
 export const columns: ColumnDef<PostColumn>[] = [
   {
     id: "select",

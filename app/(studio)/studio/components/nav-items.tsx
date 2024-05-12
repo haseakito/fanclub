@@ -1,22 +1,31 @@
 "use client";
 
+import axios from "axios";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import toast from "react-hot-toast";
+
+import { Button } from "@/components/ui/button";
+
 import {
   LayoutDashboard,
   Box,
   CreditCard,
-  MessageCircleMore,
   History,
   Settings,
+  Star,
   LogOut,
 } from "lucide-react";
-import { OrganizationSwitcher, SignOutButton } from "@clerk/nextjs";
-import { SignedIn } from "@clerk/clerk-react";
-import { Button } from "@/components/ui/button";
 
-export const StudioNavigationMenu = () => {
+export const StudioNavigationMenu = ({ signedIn }: { signedIn: boolean }) => {
+  // Boolean state handling loading during API request
+  const [loading, setLoading] = useState(false);
+
+  // Hooks handling router
+  const router = useRouter();
+
   // Hooks handling current URL's pathname
   const pathname = usePathname();
 
@@ -46,10 +55,10 @@ export const StudioNavigationMenu = () => {
       active: pathname === `/studio/subscriptions`,
     },
     {
-      href: `/studio/comments`,
-      label: "Comments",
-      icon: <MessageCircleMore className="h-5 w-5" />,
-      active: pathname === `/studio/comments`,
+      href: `/studio/reviews`,
+      label: "Reviews",
+      icon: <Star className="h-5 w-5" />,
+      active: pathname === `/studio/reviews`,
     },
     {
       href: `/studio/orders`,
@@ -65,17 +74,30 @@ export const StudioNavigationMenu = () => {
     },
   ];
 
+  // Function handling deleting the cookie session
+  const onLogout = async () => {
+    try {
+      setLoading(true);
+
+      // DELETE request to proxy server
+      await axios.delete("/api/auth/sign-out");
+
+      // Show a success toast
+      toast.success("Successfully logged out!");
+
+      // Redirect the user to login page
+      router.push("/auth/sign-in");
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 z-40 w-16 md:w-52 h-full transition-transform -translate-x-full sm:translate-x-0">
       <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-slate-900/50">
         <div className="mt-10 grid space-y-2">
-          <div className="overflow-x-hidden">
-            <OrganizationSwitcher appearance={{
-              elements: {
-                organizationSwitcherTrigger: "p-2 text-muted-foreground hover:text-black hover:dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
-              }
-            }} />
-          </div>
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -93,14 +115,17 @@ export const StudioNavigationMenu = () => {
           ))}
         </div>
         <div className="mt-60">
-          <SignedIn>
-            <SignOutButton>
-              <Button variant="destructive" className="md:w-full">
-                <p className="hidden md:block">Sign out</p>
-                <LogOut className="h-5 w-5 md:hidden" />
-              </Button>
-            </SignOutButton>
-          </SignedIn>
+          {signedIn ? (
+            <Button
+              variant="secondary"
+              disabled={loading}
+              onClick={onLogout}
+              className="w-full flex items-center gap-x-5 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-md text-sm font-medium p-3"
+            >
+              <LogOut className="w-5 h-5" />
+              <p>Logout</p>
+            </Button>
+          ) : null}
         </div>
       </div>
     </nav>

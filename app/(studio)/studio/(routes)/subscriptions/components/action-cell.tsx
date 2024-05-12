@@ -3,7 +3,6 @@
 import axios from "axios";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@clerk/nextjs";
 import { toast } from "react-hot-toast";
 
 import { Button } from "@/components/ui/button";
@@ -24,8 +23,6 @@ interface ActionCellProps {
 }
 
 export const ActionCell: React.FC<ActionCellProps> = ({ data }) => {
-  const { getToken } = useAuth();
-
   // Boolean state handling modal state
   const [open, setOpen] = useState(false);
 
@@ -46,7 +43,7 @@ export const ActionCell: React.FC<ActionCellProps> = ({ data }) => {
         process.env.NEXT_PUBLIC_API_URL + `/subscriptions/${data.id}`,
         {
           headers: {
-            Authorization: `${await getToken()}`,            
+            Authorization: ``,            
           },
         }
       );
