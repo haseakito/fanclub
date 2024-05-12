@@ -1,15 +1,13 @@
 "use client";
 
-import axios from "axios";
+import axios from "@/lib/axios";
 import * as z from "zod";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useAuth } from "@clerk/nextjs";
 import toast from "react-hot-toast";
 
-import { Divider } from "@/components/ui/divider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,21 +22,27 @@ import {
 } from "@/components/ui/form";
 
 const formSchema = z.object({
-  username: z.string().min(1, "username is required"),
+  name: z
+    .string()
+    .min(1, {
+      message: "Name is required",
+    })
+    .max(100, {
+      message: "Name must be no more than 100 characters long",
+    }),
   bio: z.string().max(1000),
-  url: z.string().url().optional().or(z.literal('')),
+  url: z.string().url().optional().or(z.literal("")),
 });
 
 interface ProfileFormProps {
   initialData: User | null;
+  token: string | null;
 }
 
-export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
-  const { userId, getToken } = useAuth();
-
-  // Boolean state handling modal state
-  const [open, setOpen] = useState(false);
-
+export const ProfileForm: React.FC<ProfileFormProps> = ({
+  initialData,
+  token,
+}) => {
   // Boolean state handling loading during API request
   const [loading, setLoading] = useState(false);
 
@@ -48,7 +52,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
         ...initialData,
       }
     : {
-        username: "",
+        name: "",
         bio: "",
         url: "",
       };
@@ -56,46 +60,28 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
   // Hooks handling router
   const router = useRouter();
 
-  // Hooks handling url param
-  const params = useParams();
-
   // Initialize form
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues,
   });
 
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (form.formState.isDirty) {
-        event.preventDefault();
-
-        return "You have unsaved changes. Are you sure you want to leave?";
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [form.formState.isDirty]);
-
-  //
+  // Function handling updating user profile
   const onSubmit = async (e: z.infer<typeof formSchema>) => {
     try {
       setLoading(true);
 
+      // PATCH request to server
       await axios.patch(
-        process.env.NEXT_PUBLIC_API_URL + `/users/${userId}`,
+        "/users/update/profile",
         {
-          "username": e.username,
-          "bio": e.bio,
-          "url": e.url
+          username: e.name,
+          bio: e.bio,
+          url: e.url,
         },
         {
           headers: {
-            Authorization: `${await getToken()}`,
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -117,13 +103,6 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
 
   return (
     <>
-      <h3 className="text-lg font-medium">Update your profile.</h3>
-      <p className="text-sm text-muted-foreground">
-        This is how others will see you on the site.
-      </p>
-
-      <Divider />
-
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -133,15 +112,15 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
           <div className="col-span-full">
             <FormField
               control={form.control}
-              name="username"
+              name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input
                       disabled={loading}
                       type="text"
-                      placeholder="designful"
+                      placeholder="example"
                       {...field}
                     />
                   </FormControl>
@@ -182,7 +161,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({ initialData }) => {
                 <FormItem>
                   <FormLabel>URL</FormLabel>
                   <FormDescription>
-                    Add link to your website, blog, or social media profiles.
+                    Add a link to your website, blog, or social media profiles.
                   </FormDescription>
                   <FormControl>
                     <Input
