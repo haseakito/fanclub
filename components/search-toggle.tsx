@@ -33,9 +33,7 @@ export const SearchToggle = () => {
         <Command>
           <CommandInput placeholder="Type your interest" />
           <CommandEmpty>No results found</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
-
-          </CommandGroup>
+          <CommandGroup className="max-h-64 overflow-auto"></CommandGroup>
         </Command>
       </DialogContent>
     </Dialog>
